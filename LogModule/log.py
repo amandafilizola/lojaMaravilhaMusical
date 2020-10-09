@@ -9,7 +9,7 @@ def log(user, actionDescription):
   location = os.path.abspath(os.path.dirname(sys.argv[0]))
 
   #abro o arquivo de logs se ele já existir, senão, o cria
-  f = open(os.path.join(location,'log_maravilha_musical.txt'), 'a')
+  f = open(os.path.join(location,'log_maravilha_musical.txt'),mode='a', encoding="utf-8")
 
   #escrevo as informações em uma linha do txt com o formato [HORA ATUAL] USUÁRIO --> AÇÃO
   f.write('[{0}] {1} --> {2}\n'.format(now, user, actionDescription))

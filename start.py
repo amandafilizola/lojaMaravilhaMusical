@@ -1,7 +1,14 @@
 #from InstancesModule.People import * as people
 import InstancesModule.People as people
 import InstancesModule.Profiles as profiles
-import pandas as pd
+from os import path
+
+#checar arquivos da base de dados
+if(not path.exists("database.xlsx")):
+  print("não existe") #colocar aqui o DBinit
+else:
+  print('existe')
+
 
 print("Olá, bem-vindo a Loja Maravilha Musical! Você pode:\n1.Realizar login.\n2.Se cadastrar no sistema\n3.Sair do sistema")
 
