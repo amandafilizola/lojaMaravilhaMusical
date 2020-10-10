@@ -44,6 +44,7 @@ def createPeople(profileAccess):
     writer.sheets = {ws.title: ws for ws in writer.book.worksheets}
     frame.to_excel(writer, sheet_name='pessoas',startrow=writer.sheets['pessoas'].max_row, header=headerMode, index=False)
   writer.save()
+  print('Seu cadastro agora será analisado pela nossa equipe! Basta esperar o aceite de seu cadastro!\n')
   log.log(name, 'se cadastrando pela primeira vez')
 
 def DbInit():
@@ -81,6 +82,9 @@ def listPendingProfiles(loggedUser):
     if(len(listPendingUsers)>0):
       approve = True
       while approve:
+        database = pd.ExcelFile('database.xlsx')
+        usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
+        listPendingUsers = usersList.loc[usersList['perfil'] == profiles.Profiles.Pending]
         print('\n===========================================================================\n')
         print(listPendingUsers)
         print('\n===========================================================================\n')

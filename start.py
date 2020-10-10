@@ -16,17 +16,29 @@ loginOption = people.questionUntilReturnsInteger("Olá, bem-vindo a Loja Maravil
 if(loginOption == 1): 
   loggedUser = people.login()
   print("Basta digitar a opção desejada!")
-  #caso seja um cliente
   row = loggedUser.index[0]
+
+  #CASO SEJA UM CLIENTE
+  #====================================================================================
   if(loggedUser.loc[row].perfil == profiles.Profiles.Client):
     clientActionOption = people.questionUntilReturnsInteger("1.Listar itens à venda.\n2.Comprar item à venda\n3.Sair do sistema")
 
+
+
+  #CASO SEJA UM GERENTE
+  #====================================================================================
   if(loggedUser.loc[row].perfil == profiles.Profiles.Manager):
     managerActionOption = people.questionUntilReturnsInteger("1.Aceitar um perfil pendente\n")
     if(managerActionOption == 1):
       people.listPendingProfiles(loggedUser)
 
+
+  #CASO SEJA UM FUNCIONÁRIO
+  #====================================================================================
   if(loggedUser.loc[row].perfil == profiles.Profiles.Employee):
+    print('sou employee')#TODO
+
+
 
 elif(loginOption == 2): #para se cadastrar no sistema como cliente independente
   people.createPeople(profiles.Profiles.Pending)
