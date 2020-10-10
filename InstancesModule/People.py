@@ -42,7 +42,7 @@ def createPeople(profileAccess):
   with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode=excelWriteMode) as writer:
     #OLHA AQUI UM LIST COMPREHENSION!!
     writer.sheets = {ws.title: ws for ws in writer.book.worksheets}
-    frame.to_excel(writer, sheet_name='pessoas',startrow=writer.sheets['pessoas'].max_row, header=headerMode)
+    frame.to_excel(writer, sheet_name='pessoas',startrow=writer.sheets['pessoas'].max_row, header=headerMode, index=False)
   writer.save()
   log.log(name, 'se cadastrando pela primeira vez')
 
@@ -52,7 +52,7 @@ def DbInit():
   #escrever no excel
   with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='w') as writer:
     #OLHA AQUI UM LIST COMPREHENSION!!
-    frame.to_excel(writer, sheet_name='pessoas',header=True)
+    frame.to_excel(writer, sheet_name='pessoas',header=True, index=False)
   writer.save()
   log.log('Admin', 'inicializando o banco de dados')
 
@@ -72,3 +72,48 @@ def login():
     else:
       print('Não encontrei seus dados no nosso cadastro. Talvez voce tenha errado a senha?\n')
       return ''
+
+def listPendingProfiles():
+  if(os.path.exists('database.xlsx')):
+    database = pd.ExcelFile('database.xlsx')
+    usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
+    listPendingUsers = usersList.loc[usersList['perfil'] == profiles.Profiles.Pending]
+    if(len(listPendingUsers)>0):
+      
+      print(listPendingUsers)
+
+      approve = True
+      while approve:
+        approve = questionUntilReturnsInteger("voce deseja aprovar algum cadastro?\n1.Sim\n2.Não\n")
+        if(approve == 1):
+          approveUserId = questionUntilReturnsInteger("qual o id da pessoa, de acordo com a tabela, que você deseja atualizar?")
+          newProfile = questionUntilReturnsInteger("Esta pessoa deverá receber que tipo de perfil de cadastro?\n1.Cliente\n2.Funcionário\n3.Gerente\n")
+          profileArray = ['cliente', 'funcionário', 'gerente']
+          print("certo, iremos colocá-lo como {}\n\n".format(profileArray[newProfile-1]))
+          # print(usersList)
+          print(usersList.loc[usersList['id']==approveUserId]['perfil'])
+          if(newProfile==1):
+            usersList.loc[usersList['id']==approveUserId,'perfil'] = profiles.Profiles.Client
+          elif(newProfile==2):
+            usersList.loc[usersList['id']==approveUserId,'perfil'] = profiles.Profiles.Employee
+          elif(newProfile==3):
+            usersList.loc[usersList['id']==approveUserId,'perfil'] = profiles.Profiles.Manager
+
+          # with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
+          #   usersList.to_excel(writer, sheet_name='pessoas',header=True, index=False)
+          # writer.save()
+        else:
+          approve = False
+    else:
+      print('Não temos cadastros pendentes!')
+
+
+#função para rejeitar as entradas do usuário caso digite errado.
+def questionUntilReturnsInteger(string):
+  while True:
+    try:
+      result = int(input(string))
+      break
+    except:
+      print("Não entendi isso. Você digitou apenas o número?\n")
+  return result

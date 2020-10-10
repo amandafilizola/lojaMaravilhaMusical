@@ -23,6 +23,6 @@ def DbInit():
   frame = pd.DataFrame(instrumentsDict)
   with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
     #OLHA AQUI UM LIST COMPREHENSION!!
-    frame.to_excel(writer, sheet_name='instrumentos',header=True)
+    frame.to_excel(writer, sheet_name='instrumentos',header=True, index=False)
   writer.save()
   log.log('Instrumentos', 'inicializando o banco de dados')

@@ -3,36 +3,36 @@ import InstancesModule.People as people
 import InstancesModule.Instruments as instruments
 import InstancesModule.Profiles as profiles
 from os import path
+import subprocess
 
-#checar arquivos da base de dados
+#checar arquivos da base de dados, se não existir, rodar função de criação
 if(not path.exists("database.xlsx")):
   people.DbInit()
   instruments.DbInit()
-  
 
-print("Olá, bem-vindo a Loja Maravilha Musical! Você pode:\n1.Realizar login.\n2.Se cadastrar no sistema\n3.Sair do sistema")
-
-while True:
-  try:
-    loginOption=int(input("Basta digitar a opção desejada!"))
-    break
-  except:
-    print("Não entendi isso. Você digitou apenas o número?")
-
+loginOption = people.questionUntilReturnsInteger("Olá, bem-vindo a Loja Maravilha Musical! Você pode:\n1.Realizar login.\n2.Se cadastrar no sistema\n3.Sair do sistema")
 
 if(loginOption == 1): 
   loggedUser = people.login()
-
+  print("Basta digitar a opção desejada!")
   #caso seja um cliente
-  # if(loggedUser[0]['profile'] == profiles.Profiles.Client):
-    
+  if(loggedUser.loc[0].perfil == profiles.Profiles.Client):
+    clientActionOption = people.questionUntilReturnsInteger("1.Listar itens à venda.\n2.Comprar item à venda\n3.Sair do sistema")
+    # try:
+    #   clientActionOption=int(input("Basta digitar a opção desejada!"))
+    #   break
+    # except:
+    #   print("Não entendi isso. Você digitou apenas o número?")
 
+  elif(loggedUser.loc[0].perfil == profiles.Profiles.Manager):
+    managerActionOption = people.questionUntilReturnsInteger("1.Aceitar um perfil pendente\n")
+    if(managerActionOption == 1):
+      people.listPendingProfiles()
 
-
-if(loginOption == 2): #para se cadastrar no sistema como cliente independente
+elif(loginOption == 2): #para se cadastrar no sistema como cliente independente
   people.createPeople(profiles.Profiles.Pending)
 
-if(loginOption == 3): # para sair do sistema
+elif(loginOption == 3): # para sair do sistema
   print("Obrigado por escolher a Maravilha Musical! Até mais!")
   exit()
 
