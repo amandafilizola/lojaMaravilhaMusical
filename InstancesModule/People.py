@@ -30,7 +30,7 @@ def createPeople(profileAccess):
   else:
     excelWriteMode = 'a'
     headerMode = False
-    database = pd.read_excel('database.xlsx')
+    database = pd.read_excel('database.xlsx', 'pessoas')
     max_value = database['id'].max()
     id = max_value+1
 
@@ -73,15 +73,15 @@ def login():
       print('Não encontrei seus dados no nosso cadastro. Talvez voce tenha errado a senha?\n')
       return ''
 
-def listPendingProfiles():
+def listPendingProfiles(loggedUser):
   if(os.path.exists('database.xlsx')):
     database = pd.ExcelFile('database.xlsx')
     usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
     listPendingUsers = usersList.loc[usersList['perfil'] == profiles.Profiles.Pending]
     if(len(listPendingUsers)>0):
-      
+      print('\n===========================================================================\n')
       print(listPendingUsers)
-
+      print('\n===========================================================================\n')
       approve = True
       while approve:
         approve = questionUntilReturnsInteger("voce deseja aprovar algum cadastro?\n1.Sim\n2.Não\n")
@@ -90,8 +90,6 @@ def listPendingProfiles():
           newProfile = questionUntilReturnsInteger("Esta pessoa deverá receber que tipo de perfil de cadastro?\n1.Cliente\n2.Funcionário\n3.Gerente\n")
           profileArray = ['cliente', 'funcionário', 'gerente']
           print("certo, iremos colocá-lo como {}\n\n".format(profileArray[newProfile-1]))
-          # print(usersList)
-          print(usersList.loc[usersList['id']==approveUserId]['perfil'])
           if(newProfile==1):
             usersList.loc[usersList['id']==approveUserId,'perfil'] = profiles.Profiles.Client
           elif(newProfile==2):
@@ -99,9 +97,17 @@ def listPendingProfiles():
           elif(newProfile==3):
             usersList.loc[usersList['id']==approveUserId,'perfil'] = profiles.Profiles.Manager
 
-          # with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
-          #   usersList.to_excel(writer, sheet_name='pessoas',header=True, index=False)
-          # writer.save()
+          with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
+            workbook = writer.book
+            try:
+              workbook.remove(workbook['pessoas'])
+            except:
+                print("Worksheet does not exist")
+            finally:
+              usersList.to_excel(writer, sheet_name='pessoas',header=True, index=False)
+            writer.save()
+          log.log(loggedUser.loc[0].nome, 'aprovando o usuário {} para o perfil {}'.format(usersList.loc[usersList['id']==approveUserId].nome.iloc[0],profileArray[newProfile-1]))
+
         else:
           approve = False
     else:
