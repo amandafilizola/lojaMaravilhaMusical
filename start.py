@@ -17,13 +17,16 @@ if(loginOption == 1):
   loggedUser = people.login()
   print("Basta digitar a opção desejada!")
   #caso seja um cliente
-  if(loggedUser.loc[0].perfil == profiles.Profiles.Client):
+  row = loggedUser.index[0]
+  if(loggedUser.loc[row].perfil == profiles.Profiles.Client):
     clientActionOption = people.questionUntilReturnsInteger("1.Listar itens à venda.\n2.Comprar item à venda\n3.Sair do sistema")
-    
-  elif(loggedUser.loc[0].perfil == profiles.Profiles.Manager):
+
+  if(loggedUser.loc[row].perfil == profiles.Profiles.Manager):
     managerActionOption = people.questionUntilReturnsInteger("1.Aceitar um perfil pendente\n")
     if(managerActionOption == 1):
       people.listPendingProfiles(loggedUser)
+
+  if(loggedUser.loc[row].perfil == profiles.Profiles.Employee):
 
 elif(loginOption == 2): #para se cadastrar no sistema como cliente independente
   people.createPeople(profiles.Profiles.Pending)

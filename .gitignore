@@ -1,3 +1,5 @@
 .vscode
 log_maravilha_musical.txt
 database.xlsx
+LogModule/__pycache__
+InstancesModule/__pycache__

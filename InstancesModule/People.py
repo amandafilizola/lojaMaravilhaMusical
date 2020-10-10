@@ -79,11 +79,11 @@ def listPendingProfiles(loggedUser):
     usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
     listPendingUsers = usersList.loc[usersList['perfil'] == profiles.Profiles.Pending]
     if(len(listPendingUsers)>0):
-      print('\n===========================================================================\n')
-      print(listPendingUsers)
-      print('\n===========================================================================\n')
       approve = True
       while approve:
+        print('\n===========================================================================\n')
+        print(listPendingUsers)
+        print('\n===========================================================================\n')
         approve = questionUntilReturnsInteger("voce deseja aprovar algum cadastro?\n1.Sim\n2.Não\n")
         if(approve == 1):
           approveUserId = questionUntilReturnsInteger("qual o id da pessoa, de acordo com a tabela, que você deseja atualizar?")
