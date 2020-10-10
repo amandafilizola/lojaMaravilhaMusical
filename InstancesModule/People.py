@@ -45,3 +45,30 @@ def createPeople(profileAccess):
     frame.to_excel(writer, sheet_name='pessoas',startrow=writer.sheets['pessoas'].max_row, header=headerMode)
   writer.save()
   log.log(name, 'se cadastrando pela primeira vez')
+
+def DbInit():
+  personDict = {'id':1, 'login':['admin'], 'senha':['admin'], 'nome':['admin'], 'idade': [0], 'data nascimento':[0], 'perfil':[profiles.Profiles.Manager]}
+  frame = pd.DataFrame(personDict)
+  #escrever no excel
+  with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='w') as writer:
+    #OLHA AQUI UM LIST COMPREHENSION!!
+    frame.to_excel(writer, sheet_name='pessoas',header=True)
+  writer.save()
+  log.log('Admin', 'inicializando o banco de dados')
+
+def login():
+  if(os.path.exists('database.xlsx')):
+    tryLogin = input("login?\n")
+    tryPassword = input("senha?\n")
+
+    database = pd.ExcelFile('database.xlsx')
+    usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
+    loggedUser = usersList.loc[(usersList['login'] == tryLogin) & (usersList['senha']== tryPassword)]
+    if(len(loggedUser)==1):
+      nome = loggedUser.iloc[0]['nome']
+      print('Login realizado, bem vindo {}!'.format(nome))
+      log.log(nome, 'logou no sistema')
+      return loggedUser
+    else:
+      print('Não encontrei seus dados no nosso cadastro. Talvez voce tenha errado a senha?\n')
+      return ''
