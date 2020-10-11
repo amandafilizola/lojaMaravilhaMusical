@@ -32,8 +32,7 @@ def DbInit():
   writer.save()
   log.log('Instrumentos', 'inicializou o banco de dados')
 
-
-def listInstruments(loggedUser, showMode):
+def listInstruments(loggedUser, showMode, logMode):
   #se showMode for True, itens já vendidos devem aparecer
   #se showMode for False, apenas itens disponíveis devem aparecer
 
@@ -49,15 +48,14 @@ def listInstruments(loggedUser, showMode):
   print('\n===========================================================================\n')
   
   row = loggedUser.index[0]
-  log.log(loggedUser.loc[row].nome, 'listou todos os instrumentos')
-
+  if(logMode == True):
+    log.log(loggedUser.loc[row].nome, 'listou todos os instrumentos')
 
 def buyInstrument(loggedUser, showMode):
-  listInstruments(loggedUser, showMode)
+  listInstruments(loggedUser, showMode, False)
   whichInstrument = people.questionUntilReturnsInteger('Qual o id do instrumento que deseja comprar?\n')
   database = pd.ExcelFile('database.xlsx')
   instrumentsList = database.parse('instrumentos')
-  print(instrumentsList.loc[instrumentsList['id'] == whichInstrument].vendedor.iloc[0])
   if(pd.isnull(instrumentsList.loc[instrumentsList['id'] == whichInstrument].vendedor.iloc[0])):
     usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
     listEmployees = usersList.loc[usersList['perfil'] == profiles.Profiles.Employee]
@@ -67,7 +65,7 @@ def buyInstrument(loggedUser, showMode):
     print('\n===========================================================================\n')
 
     whichSeller = people.questionUntilReturnsInteger('Qual o id do vendedor que o atendeu?\n')
-    buyApproved = people.questionUntilReturnsInteger('O instrumento é um(a) {} e custa {}. Você realizará esta compra com {}?\n1.Sim\n2.Não'.format(
+    buyApproved = people.questionUntilReturnsInteger('O instrumento é um(a) {} e custa {}. Você realizará esta compra com {}?\n1.Sim\n2.Não\n'.format(
     instrumentsList.loc[instrumentsList['id'] == whichInstrument].tipo.iloc[0],
     instrumentsList.loc[instrumentsList['id'] == whichInstrument].preco.iloc[0],
     usersList.loc[usersList['id'] == whichSeller].nome.iloc[0]
@@ -99,10 +97,9 @@ def buyInstrument(loggedUser, showMode):
       usersList.loc[usersList['id'] == whichSeller].nome.iloc[0]
       ))
     else:
-      print('Aw, uma pena que não vais levar desta vez! Sempre estaremos de portas abertas para sua vontade musical! Volte sempre!')
+      print('Aw, uma pena que não vais levar desta vez! Sempre estaremos de portas abertas para sua vontade musical! Volte sempre!\n')
   else:
-    print('Ops, parece que já vendemos este item! Quer olhar algo mais?')
-
+    print('Ops, parece que já vendemos este item! Quer olhar algo mais?\n')
 
 def showStock(loggedUser):
   database = pd.ExcelFile('database.xlsx')
@@ -117,7 +114,6 @@ def showStock(loggedUser):
   log.log(loggedUser.loc[row].nome, 'consultou o estoque de instrumentos')
   
 def createInstrument(loggedUser):
-
   print("Você entrou no cadastro de novos instrumentos.")
   typeOfInstrument = input("Qual o tipo do instrumento a ser cadastrado?\n")
   price = people.questionUntilReturnsInteger("Qual o preço do instrumento?\n")
@@ -159,6 +155,105 @@ def createInstrument(loggedUser):
     price,
   ))
     
-  
-  
+def updateInstrument(loggedUser):
+  print("Você entrou na atualização de instrumentos.")
+  database = pd.ExcelFile('database.xlsx')
+  instrumentsList = database.parse('instrumentos')
+  listInstruments(loggedUser, False, False)
 
+  whichInstrument = people.questionUntilReturnsInteger('Qual id do instrumento que você deseja atualizar?\n')
+
+  #salvando antigas informações para logar a mudança em detalhes
+  oldType = instrumentsList.loc[instrumentsList['id'] == whichInstrument].tipo.iloc[0]
+  oldPrice = instrumentsList.loc[instrumentsList['id'] == whichInstrument].preco.iloc[0]
+
+  if(pd.isnull(instrumentsList.loc[instrumentsList['id'] == whichInstrument].vendedor.iloc[0])):
+    updateType = people.questionUntilReturnsInteger('Você deseja atualizar que características do instrumento?\n1.Tipo\n2.Preço\n3.Tipo e preço\n')
+
+    if(updateType == 1):
+      newType = input('Qual o novo tipo do instrumento?\n')
+      instrumentsList.loc[instrumentsList['id'] == whichInstrument,'tipo'] = newType
+
+    elif(updateType == 2):
+      newPrice = people.questionUntilReturnsInteger('Qual o novo preço do instrumento?\n')
+      instrumentsList.loc[instrumentsList['id'] == whichInstrument,'preco'] = newPrice
+
+    elif(updateType == 3):
+      newType = input('Qual o novo tipo do instrumento?\n')
+      newPrice = people.questionUntilReturnsInteger('Qual o novo preço do instrumento?\n')
+      instrumentsList.loc[instrumentsList['id'] == whichInstrument,'tipo'] = newType
+      instrumentsList.loc[instrumentsList['id'] == whichInstrument,'preco'] = newPrice
+    
+    updateApproved = people.questionUntilReturnsInteger('O instrumento é um(a) {} e custa {}. Você confirma esta modificação?\n1.Sim\n2.Não\n'.format(
+    instrumentsList.loc[instrumentsList['id'] == whichInstrument].tipo.iloc[0],
+    instrumentsList.loc[instrumentsList['id'] == whichInstrument].preco.iloc[0]
+    ))
+    if(updateApproved == 1):
+      with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
+        workbook = writer.book
+        try:
+          workbook.remove(workbook['instrumentos'])
+        except:
+            print("Worksheet does not exist")
+        finally:
+          instrumentsList.to_excel(writer, sheet_name='instrumentos',header=True, index=False)
+        writer.save()
+      
+      row = loggedUser.index[0]
+      if(updateType == 1):
+        log.log(loggedUser.loc[row].nome, 'atualizou o tipo do instrumento {} de "{}" para "{}"'.format(whichInstrument,oldType,newType))
+
+      elif(updateType == 2):
+        log.log(loggedUser.loc[row].nome, 'atualizou o preço do instrumento {} de "{}" para "{}"'.format(whichInstrument,oldPrice,newPrice))
+
+      elif(updateType == 3):
+        log.log(loggedUser.loc[row].nome, 'atualizou o tipo do instrumento {} de "{}" para "{}" e o preço de "{}" para "{}"'.format(whichInstrument,oldType,newType, oldPrice, newPrice))
+  else:
+    print('Ops, parece que já vendemos este item! Quer editar algo mais?\n')
+
+def deleteInstrument(loggedUser):
+  print("Você entrou na deleção de instrumentos.")
+  database = pd.ExcelFile('database.xlsx')
+  instrumentsList = database.parse('instrumentos')
+  listInstruments(loggedUser, False, False)
+
+  
+  whichInstrument = people.questionUntilReturnsInteger('Qual id do instrumento que você deseja deletar?\n')
+  #checar se o id está na lista
+  if(len(instrumentsList[instrumentsList['id'] == whichInstrument])>0):
+    print(instrumentsList[instrumentsList['id'] == whichInstrument])
+    deleteApproved = people.questionUntilReturnsInteger('Você confirma esta deleção?\n1.Sim\n2.Não\n')
+    if(deleteApproved == 1):
+      filteredInstrumentlist = instrumentsList[instrumentsList['id'] != whichInstrument]
+      with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
+        workbook = writer.book
+        try:
+          workbook.remove(workbook['instrumentos'])
+        except:
+          print("Worksheet does not exist")
+        finally:
+          filteredInstrumentlist.to_excel(writer, sheet_name='instrumentos',header=True, index=False)
+        writer.save()
+      row = loggedUser.index[0]
+      log.log(loggedUser.loc[row].nome, 'deletou o instrumento {} do tipo {} e preço {}'.format(
+      whichInstrument,
+      instrumentsList.loc[instrumentsList['id'] == whichInstrument].tipo.iloc[0],
+      instrumentsList.loc[instrumentsList['id'] == whichInstrument].preco.iloc[0]
+      ))
+    else:
+      print('Certo, nada foi deletado não!\n')
+  else:
+    print('Não temos esse instrumento no nosso cadastro!\n')
+
+def searchForInstrument(loggedUser):
+  print("Você entrou na busca por instrumentos.")
+  database = pd.ExcelFile('database.xlsx')
+  instrumentsList = database.parse('instrumentos')
+  searchTerm = input('Procuras por que tipo de instrumento?')
+  searchResults = instrumentsList[instrumentsList['tipo'].str.contains(searchTerm)]
+  print(searchResults)
+  row = loggedUser.index[0]
+  log.log(loggedUser.loc[row].nome, 'buscou na base de dados o termo "{}" e teve {} resultados'.format(
+  searchTerm,
+  len(searchResults)
+  ))

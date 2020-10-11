@@ -6,7 +6,7 @@ import os, sys
 
 #Cada pessoa terá um ID,Login, Senha, Nome, Idade, CPF, data de nascimento e por último, perfil.
 
-def createPeople(profileAccess):
+def createPeople(profileAccess, loggedUser):
 
   print("Você entrou no cadastro de novos usuários.")
   name = input("Qual o nome a ser cadastrado?\n")
@@ -45,7 +45,12 @@ def createPeople(profileAccess):
     frame.to_excel(writer, sheet_name='pessoas',startrow=writer.sheets['pessoas'].max_row, header=headerMode, index=False)
   writer.save()
   print('Seu cadastro agora será analisado pela nossa equipe! Basta esperar o aceite de seu cadastro!\n')
-  log.log(name, 'se cadastrou pela primeira vez')
+  
+  if(not isinstance(loggedUser, pd.DataFrame)):
+    log.log(name, 'se cadastrou pela primeira vez')
+  else:
+    row = loggedUser.index[0]
+    log.log(loggedUser.loc[row].nome, 'criou o usuário de nome "{}" e login "{}"'.format(name, login))
 
 #iniciar banco de dados de pessoas
 def DbInit():
@@ -124,6 +129,18 @@ def listPendingProfiles(loggedUser):
     else:
       print('Não temos cadastros pendentes!')
 
+def searchForUsers(loggedUser):
+  print("Você entrou na busca por usuários.")
+  database = pd.ExcelFile('database.xlsx')
+  usersList = database.parse('pessoas')
+  searchTerm = input('Procuras por que usuário? podes procuras pelo login ou pelo nome.\n')
+  searchResults = usersList[(usersList['login'].str.contains(searchTerm)) | (usersList['nome'].str.contains(searchTerm))]
+  print(searchResults)
+  row = loggedUser.index[0]
+  log.log(loggedUser.loc[row].nome, 'buscou na base de dados o termo "{}" e teve {} resultados'.format(
+  searchTerm,
+  len(searchResults)
+  ))
 
 #função para rejeitar as entradas do usuário caso digite errado.
 def questionUntilReturnsInteger(string):
