@@ -21,8 +21,29 @@ if(loginOption == 1):
   #CASO SEJA UM CLIENTE
   #====================================================================================
   if(loggedUser.loc[row].perfil == profiles.Profiles.Client):
-    clientActionOption = people.questionUntilReturnsInteger("1.Listar itens à venda.\n2.Comprar item à venda\n3.Sair do sistema")
+    clientActionOption = people.questionUntilReturnsInteger("1.Listar itens à venda.\n2.Comprar item à venda\n3.Sair do sistema\n")
+    if(clientActionOption == 1):
+      instruments.listInstruments(loggedUser, False)
+    if(clientActionOption == 2):
+      instruments.buyInstrument(loggedUser, False)
+    if(clientActionOption == 3):
+      people.logout()
 
+
+
+
+  #CASO SEJA UM FUNCIONÁRIO
+  #====================================================================================
+  if(loggedUser.loc[row].perfil == profiles.Profiles.Employee):
+    employeeActionOption = people.questionUntilReturnsInteger("1.Listar itens.\n2.Comprar item à venda\n3.Sair do sistema\n4.Mostrar estoque atual")
+    if(employeeActionOption == 1):
+      instruments.listInstruments(loggedUser, True)
+    if(employeeActionOption == 2):
+      instruments.buyInstrument(loggedUser, True)
+    # if(employeeActionOption == 3):
+    #   people.logout()
+    if(employeeActionOption == 4):
+      instruments.showStock(loggedUser)
 
 
   #CASO SEJA UM GERENTE
@@ -33,10 +54,6 @@ if(loginOption == 1):
       people.listPendingProfiles(loggedUser)
 
 
-  #CASO SEJA UM FUNCIONÁRIO
-  #====================================================================================
-  if(loggedUser.loc[row].perfil == profiles.Profiles.Employee):
-    print('sou employee')#TODO
 
 
 
@@ -44,7 +61,6 @@ elif(loginOption == 2): #para se cadastrar no sistema como cliente independente
   people.createPeople(profiles.Profiles.Pending)
 
 elif(loginOption == 3): # para sair do sistema
-  print("Obrigado por escolher a Maravilha Musical! Até mais!")
-  exit()
+  people.logout()
 
 

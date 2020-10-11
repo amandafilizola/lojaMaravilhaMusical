@@ -45,7 +45,7 @@ def createPeople(profileAccess):
     frame.to_excel(writer, sheet_name='pessoas',startrow=writer.sheets['pessoas'].max_row, header=headerMode, index=False)
   writer.save()
   print('Seu cadastro agora será analisado pela nossa equipe! Basta esperar o aceite de seu cadastro!\n')
-  log.log(name, 'se cadastrando pela primeira vez')
+  log.log(name, 'se cadastrou pela primeira vez')
 
 def DbInit():
   personDict = {'id':1, 'login':['admin'], 'senha':['admin'], 'nome':['admin'], 'idade': [0], 'data nascimento':[0], 'perfil':[profiles.Profiles.Manager]}
@@ -55,7 +55,7 @@ def DbInit():
     #OLHA AQUI UM LIST COMPREHENSION!!
     frame.to_excel(writer, sheet_name='pessoas',header=True, index=False)
   writer.save()
-  log.log('Admin', 'inicializando o banco de dados')
+  log.log('Admin', 'inicializou o banco de dados')
 
 def login():
   if(os.path.exists('database.xlsx')):
@@ -85,34 +85,38 @@ def listPendingProfiles(loggedUser):
         database = pd.ExcelFile('database.xlsx')
         usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
         listPendingUsers = usersList.loc[usersList['perfil'] == profiles.Profiles.Pending]
-        print('\n===========================================================================\n')
-        print(listPendingUsers)
-        print('\n===========================================================================\n')
-        approve = questionUntilReturnsInteger("voce deseja aprovar algum cadastro?\n1.Sim\n2.Não\n")
-        if(approve == 1):
-          approveUserId = questionUntilReturnsInteger("qual o id da pessoa, de acordo com a tabela, que você deseja atualizar?")
-          newProfile = questionUntilReturnsInteger("Esta pessoa deverá receber que tipo de perfil de cadastro?\n1.Cliente\n2.Funcionário\n3.Gerente\n")
-          profileArray = ['cliente', 'funcionário', 'gerente']
-          print("certo, iremos colocá-lo como {}\n\n".format(profileArray[newProfile-1]))
-          if(newProfile==1):
-            usersList.loc[usersList['id']==approveUserId,'perfil'] = profiles.Profiles.Client
-          elif(newProfile==2):
-            usersList.loc[usersList['id']==approveUserId,'perfil'] = profiles.Profiles.Employee
-          elif(newProfile==3):
-            usersList.loc[usersList['id']==approveUserId,'perfil'] = profiles.Profiles.Manager
+        if(len(listPendingUsers)>0):
+          print('\n===========================================================================\n')
+          print(listPendingUsers)
+          print('\n===========================================================================\n')
+          approve = questionUntilReturnsInteger("voce deseja aprovar algum cadastro?\n1.Sim\n2.Não\n")
+          if(approve == 1):
+            approveUserId = questionUntilReturnsInteger("qual o id da pessoa, de acordo com a tabela, que você deseja atualizar?")
+            newProfile = questionUntilReturnsInteger("Esta pessoa deverá receber que tipo de perfil de cadastro?\n1.Cliente\n2.Funcionário\n3.Gerente\n")
+            profileArray = ['cliente', 'funcionário', 'gerente']
+            print("certo, iremos colocá-lo como {}\n\n".format(profileArray[newProfile-1]))
+            if(newProfile==1):
+              usersList.loc[usersList['id']==approveUserId,'perfil'] = profiles.Profiles.Client
+            elif(newProfile==2):
+              usersList.loc[usersList['id']==approveUserId,'perfil'] = profiles.Profiles.Employee
+            elif(newProfile==3):
+              usersList.loc[usersList['id']==approveUserId,'perfil'] = profiles.Profiles.Manager
 
-          with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
-            workbook = writer.book
-            try:
-              workbook.remove(workbook['pessoas'])
-            except:
-                print("Worksheet does not exist")
-            finally:
-              usersList.to_excel(writer, sheet_name='pessoas',header=True, index=False)
-            writer.save()
-          log.log(loggedUser.loc[0].nome, 'aprovando o usuário {} para o perfil {}'.format(usersList.loc[usersList['id']==approveUserId].nome.iloc[0],profileArray[newProfile-1]))
+            with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
+              workbook = writer.book
+              try:
+                workbook.remove(workbook['pessoas'])
+              except:
+                  print("Worksheet does not exist")
+              finally:
+                usersList.to_excel(writer, sheet_name='pessoas',header=True, index=False)
+              writer.save()
+            log.log(loggedUser.loc[0].nome, 'aprovou o usuário {} para o perfil {}'.format(usersList.loc[usersList['id']==approveUserId].nome.iloc[0],profileArray[newProfile-1]))
 
+          else:
+            approve = False
         else:
+          print('Não temos cadastros pendentes!')
           approve = False
     else:
       print('Não temos cadastros pendentes!')
@@ -127,3 +131,7 @@ def questionUntilReturnsInteger(string):
     except:
       print("Não entendi isso. Você digitou apenas o número?\n")
   return result
+
+def logout():
+  print("Obrigado por escolher a Maravilha Musical! Até mais!")
+  exit()
