@@ -47,6 +47,7 @@ def createPeople(profileAccess):
   print('Seu cadastro agora será analisado pela nossa equipe! Basta esperar o aceite de seu cadastro!\n')
   log.log(name, 'se cadastrou pela primeira vez')
 
+#iniciar banco de dados de pessoas
 def DbInit():
   personDict = {'id':1, 'login':['admin'], 'senha':['admin'], 'nome':['admin'], 'idade': [0], 'data nascimento':[0], 'perfil':[profiles.Profiles.Manager]}
   frame = pd.DataFrame(personDict)
@@ -57,6 +58,7 @@ def DbInit():
   writer.save()
   log.log('Admin', 'inicializou o banco de dados')
 
+#realizar login
 def login():
   if(os.path.exists('database.xlsx')):
     tryLogin = input("login?\n")
@@ -72,8 +74,9 @@ def login():
       return loggedUser
     else:
       print('Não encontrei seus dados no nosso cadastro. Talvez voce tenha errado a senha?\n')
-      return ''
+      logout()
 
+#listar e aprovar perfis pendentes
 def listPendingProfiles(loggedUser):
   if(os.path.exists('database.xlsx')):
     database = pd.ExcelFile('database.xlsx')
@@ -132,6 +135,7 @@ def questionUntilReturnsInteger(string):
       print("Não entendi isso. Você digitou apenas o número?\n")
   return result
 
+#função de saída do sistema
 def logout():
   print("Obrigado por escolher a Maravilha Musical! Até mais!")
   exit()

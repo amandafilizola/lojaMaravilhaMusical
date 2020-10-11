@@ -104,7 +104,7 @@ def buyInstrument(loggedUser, showMode):
     print('Ops, parece que já vendemos este item! Quer olhar algo mais?')
 
 
-def showStock():
+def showStock(loggedUser):
   database = pd.ExcelFile('database.xlsx')
   instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
 
@@ -116,7 +116,48 @@ def showStock():
   row = loggedUser.index[0]
   log.log(loggedUser.loc[row].nome, 'consultou o estoque de instrumentos')
   
+def createInstrument(loggedUser):
 
+  print("Você entrou no cadastro de novos instrumentos.")
+  typeOfInstrument = input("Qual o tipo do instrumento a ser cadastrado?\n")
+  price = people.questionUntilReturnsInteger("Qual o preço do instrumento?\n")
+
+  #ler excel para pegar o ultimo id de instrumento gerado
+  if(not os.path.exists('database.xlsx')):
+    id=1
+    excelWriteMode = 'w'
+    headerMode = True
+  else:
+    excelWriteMode = 'a'
+    headerMode = False
+    database = pd.read_excel('database.xlsx', 'instrumentos')
+    max_value = database['id'].max()
+    id = max_value+1
+
+  #UM LINDO DICIONÁRIO QUE SERIA O OBJETO INSTRUMENTO NOVO!
+  instrumentsDict = {
+    'id':id,
+    'tipo':[typeOfInstrument],
+    'vendido a':'',
+    'vendedor':'',
+    'data da venda': '',
+    'preco':[price]
+    }
+  frame = pd.DataFrame(instrumentsDict)
+
+  #escrever no excel
+  with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode=excelWriteMode) as writer:
+    #OLHA AQUI UM LIST COMPREHENSION!!
+    writer.sheets = {ws.title: ws for ws in writer.book.worksheets}
+    frame.to_excel(writer, sheet_name='instrumentos',startrow=writer.sheets['instrumentos'].max_row, header=headerMode, index=False)
+  writer.save()
+  row = loggedUser.index[0]
+  employeeName = loggedUser.loc[row].nome
+
+  log.log(employeeName, 'Cadastrou um(a) {} pelo preço de {} reais'.format(
+    typeOfInstrument,
+    price,
+  ))
     
   
   

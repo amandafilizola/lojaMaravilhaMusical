@@ -35,7 +35,7 @@ if(loginOption == 1):
   #CASO SEJA UM FUNCIONÁRIO
   #====================================================================================
   if(loggedUser.loc[row].perfil == profiles.Profiles.Employee):
-    employeeActionOption = people.questionUntilReturnsInteger("1.Listar itens.\n2.Comprar item à venda\n3.Sair do sistema\n4.Mostrar estoque atual")
+    employeeActionOption = people.questionUntilReturnsInteger("1.Listar itens.\n2.Comprar item à venda\n3.Sair do sistema\n4.Mostrar estoque atual\n5.Cadastrar novo instrumento")
     if(employeeActionOption == 1):
       instruments.listInstruments(loggedUser, True)
     if(employeeActionOption == 2):
@@ -44,6 +44,8 @@ if(loginOption == 1):
     #   people.logout()
     if(employeeActionOption == 4):
       instruments.showStock(loggedUser)
+    if(employeeActionOption == 5):
+      instruments.createInstrument(loggedUser)
 
 
   #CASO SEJA UM GERENTE
