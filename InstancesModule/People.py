@@ -10,7 +10,7 @@ def createUser(profileAccess, loggedUser):
 
   print("Você entrou no cadastro de novos usuários.")
   name = input("Qual o nome a ser cadastrado?\n")
-  age = input("Qual a idade do usuário?\n")
+  age = questionUntilReturnsInteger("Qual a idade do usuário?\n")
   cpf = questionUntilReturnsInteger("Qual o CPF do usuário?\n")
   while True:
     try:
@@ -34,6 +34,12 @@ def createUser(profileAccess, loggedUser):
     max_value = database['id'].max()
     id = max_value+1
 
+  if(profileAccess == profiles.Profiles.Manager):
+    isManager = True
+    types = [profiles.Profiles.Client, profiles.Profiles.Employee, profiles.Profiles.Manager]
+    profileType = questionUntilReturnsInteger('Qual o perfil que você deseja definir para este usuário?\n1.Cliente\n2.Funcionário\n3.Gerente\n')
+    profileAccess = types[profileType-1]
+
   #UM LINDO DICIONÁRIO QUE SERIA O OBJETO PESSOA!
   personDict = {'id':id, 'login':[login], 'senha':[password], 'nome':[name], 'idade':[age],'cpf':[cpf], 'data nascimento':[bday], 'perfil':[profileAccess]}
   frame = pd.DataFrame(personDict)
@@ -44,7 +50,8 @@ def createUser(profileAccess, loggedUser):
     writer.sheets = {ws.title: ws for ws in writer.book.worksheets}
     frame.to_excel(writer, sheet_name='pessoas',startrow=writer.sheets['pessoas'].max_row, header=headerMode, index=False)
   writer.save()
-  print('Seu cadastro agora será analisado pela nossa equipe! Basta esperar o aceite de seu cadastro!\n')
+  if(isManager != True):
+    print('Seu cadastro agora será analisado pela nossa equipe! Basta esperar o aceite de seu cadastro!\n')
 
   if(not isinstance(loggedUser, pd.DataFrame)):
     log.log(name, 'se cadastrou pela primeira vez')
@@ -54,7 +61,7 @@ def createUser(profileAccess, loggedUser):
 
 #iniciar banco de dados de pessoas
 def DbInit():
-  personDict = {'id':1, 'login':['admin'], 'senha':['admin'], 'nome':['admin'], 'idade': [0], 'data nascimento':[0], 'perfil':[profiles.Profiles.Manager]}
+  personDict = {'id':1, 'login':['admin'], 'senha':['admin'], 'nome':['admin'], 'idade': [0], 'cpf':0, 'data nascimento':[0], 'perfil':[profiles.Profiles.Manager]}
   frame = pd.DataFrame(personDict)
   #escrever no excel
   with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='w') as writer:
