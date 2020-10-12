@@ -6,12 +6,12 @@ import os, sys
 
 #Cada pessoa terá um ID,Login, Senha, Nome, Idade, CPF, data de nascimento e por último, perfil.
 
-def createPeople(profileAccess, loggedUser):
+def createUser(profileAccess, loggedUser):
 
   print("Você entrou no cadastro de novos usuários.")
   name = input("Qual o nome a ser cadastrado?\n")
   age = input("Qual a idade do usuário?\n")
-  cpf = input("Qual o CPF do usuário?\n")
+  cpf = questionUntilReturnsInteger("Qual o CPF do usuário?\n")
   while True:
     try:
       birthDate = input("Qual a data de nascimento do usuário?Eu estou esperando um formato 31/12/2020\n")
@@ -35,7 +35,7 @@ def createPeople(profileAccess, loggedUser):
     id = max_value+1
 
   #UM LINDO DICIONÁRIO QUE SERIA O OBJETO PESSOA!
-  personDict = {'id':id, 'login':[login], 'senha':[password], 'nome':[name], 'idade': [age], 'data nascimento':[bday], 'perfil':[profileAccess]}
+  personDict = {'id':id, 'login':[login], 'senha':[password], 'nome':[name], 'idade':[age],'cpf':[cpf], 'data nascimento':[bday], 'perfil':[profileAccess]}
   frame = pd.DataFrame(personDict)
 
   #escrever no excel
@@ -45,7 +45,7 @@ def createPeople(profileAccess, loggedUser):
     frame.to_excel(writer, sheet_name='pessoas',startrow=writer.sheets['pessoas'].max_row, header=headerMode, index=False)
   writer.save()
   print('Seu cadastro agora será analisado pela nossa equipe! Basta esperar o aceite de seu cadastro!\n')
-  
+
   if(not isinstance(loggedUser, pd.DataFrame)):
     log.log(name, 'se cadastrou pela primeira vez')
   else:
@@ -99,7 +99,7 @@ def listPendingProfiles(loggedUser):
           print('\n===========================================================================\n')
           approve = questionUntilReturnsInteger("voce deseja aprovar algum cadastro?\n1.Sim\n2.Não\n")
           if(approve == 1):
-            approveUserId = questionUntilReturnsInteger("qual o id da pessoa, de acordo com a tabela, que você deseja atualizar?")
+            approveUserId = questionUntilReturnsInteger("qual o id da pessoa, de acordo com a tabela, que você deseja atualizar?\n")
             newProfile = questionUntilReturnsInteger("Esta pessoa deverá receber que tipo de perfil de cadastro?\n1.Cliente\n2.Funcionário\n3.Gerente\n")
             profileArray = ['cliente', 'funcionário', 'gerente']
             print("certo, iremos colocá-lo como {}\n\n".format(profileArray[newProfile-1]))
@@ -129,6 +129,7 @@ def listPendingProfiles(loggedUser):
     else:
       print('Não temos cadastros pendentes!')
 
+#buscar usuários
 def searchForUsers(loggedUser):
   print("Você entrou na busca por usuários.")
   database = pd.ExcelFile('database.xlsx')
@@ -141,6 +142,62 @@ def searchForUsers(loggedUser):
   searchTerm,
   len(searchResults)
   ))
+
+#função para atualizar informações de usuário
+def updateUser(loggedUser):
+
+  print("Você entrou na atualização de usuários.")
+  database = pd.ExcelFile('database.xlsx')
+  usersList = database.parse('pessoas')
+  listUsers(loggedUser, False)
+
+  whichUser = questionUntilReturnsInteger('Qual id da pessoa que você deseja atualizar?\n')
+  print(usersList.loc[usersList['id'] == whichUser])
+
+  name = input("Qual o nome a ser atualizado?\n")
+  age = input("Qual a idade do usuário?\n")
+  cpf = questionUntilReturnsInteger("Qual o CPF do usuário?\n")
+  while True:
+    try:
+      birthDate = input("Qual a data de nascimento do usuário?Eu estou esperando um formato 31/12/2020\n")
+      bday = datetime.strptime(birthDate, "%d/%m/%Y")
+      break
+    except:
+      print("Não entendi isso. Me ajuda colocando no formato dd/mm/aaaa?\n")
+  login = input("Qual o username a ser atualizado?\n")
+
+  usersList.loc[usersList['id'] == whichUser,'nome'] = name
+  usersList.loc[usersList['id'] == whichUser,'idade'] = age
+  usersList.loc[usersList['id'] == whichUser,'cpf'] = cpf
+  usersList.loc[usersList['id'] == whichUser,'data nascimento'] = bday
+  usersList.loc[usersList['id'] == whichUser,'login'] = login
+
+  print(usersList.loc[usersList['id'] == whichUser])
+  approvedUserUpdate = questionUntilReturnsInteger('Você confirma a atualização acima?\n1.Sim\n2.Não\n')
+  if(approvedUserUpdate == 1):
+    with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
+      workbook = writer.book
+      try:
+        workbook.remove(workbook['pessoas'])
+      except:
+          print("Worksheet does not exist")
+      finally:
+        usersList.to_excel(writer, sheet_name='pessoas',header=True, index=False)
+      writer.save()
+    row = loggedUser.index[0]
+    log.log(loggedUser.loc[row].nome, 'atualizou o usuário {} de nome {}'.format(whichUser,name))
+
+def listUsers(loggedUser, logMode):
+  database = pd.ExcelFile('database.xlsx')
+  usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
+  
+  print('\n===========================================================================\n')
+  print(usersList)
+  print('\n===========================================================================\n')
+  
+  row = loggedUser.index[0]
+  if(logMode == True):
+    log.log(loggedUser.loc[row].nome, 'listou todos os usuários')
 
 #função para rejeitar as entradas do usuário caso digite errado.
 def questionUntilReturnsInteger(string):

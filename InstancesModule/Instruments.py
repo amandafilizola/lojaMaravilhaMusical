@@ -257,3 +257,16 @@ def searchForInstrument(loggedUser):
   searchTerm,
   len(searchResults)
   ))
+
+def listSales(loggedUser):
+  database = pd.ExcelFile('database.xlsx')
+  instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
+  
+  filteredInstrumentlist = instrumentsList[instrumentsList['vendedor'].notnull()]
+
+  print('\n===========================================================================\n')
+  print(filteredInstrumentlist)
+  print('\n===========================================================================\n')
+  
+  row = loggedUser.index[0]
+  log.log(loggedUser.loc[row].nome, 'listou todas as vendas no banco de dados')

@@ -14,9 +14,3 @@ def log(user, actionDescription):
   #escrevo as informações em uma linha do txt com o formato [HORA ATUAL] USUÁRIO --> AÇÃO
   f.write('[{0}] {1} --> {2}\n'.format(now, user, actionDescription))
   f.close()
-
-#descomente as linhas abaixo para testar
-#log('Amanda', 'Criando bases de dados')
-#log('joao', 'nada')
-
-  
