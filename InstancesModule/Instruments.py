@@ -51,8 +51,8 @@ def listInstruments(loggedUser, showMode, logMode):
   if(logMode == True):
     log.log(loggedUser.loc[row].nome, 'listou todos os instrumentos')
 
-def buyInstrument(loggedUser, showMode):
-  listInstruments(loggedUser, showMode, False)
+def buyInstrument(loggedUser, showMode, logMode):
+  listInstruments(loggedUser, showMode, logMode)
   whichInstrument = people.questionUntilReturnsInteger('Qual o id do instrumento que deseja comprar?\n')
   database = pd.ExcelFile('database.xlsx')
   instrumentsList = database.parse('instrumentos')
@@ -263,10 +263,12 @@ def listSales(loggedUser):
   instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
   
   filteredInstrumentlist = instrumentsList[instrumentsList['vendedor'].notnull()]
-
+  quantity = len(filteredInstrumentlist)
+  
   print('\n===========================================================================\n')
   print(filteredInstrumentlist)
   print('\n===========================================================================\n')
-  
+  print('{} vendas ocorreram.'.format(quantity))
+
   row = loggedUser.index[0]
   log.log(loggedUser.loc[row].nome, 'listou todas as vendas no banco de dados')

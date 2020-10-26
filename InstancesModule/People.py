@@ -194,14 +194,17 @@ def updateUser(loggedUser):
     row = loggedUser.index[0]
     log.log(loggedUser.loc[row].nome, 'atualizou o usuário {} de nome {}'.format(whichUser,name))
 
+#listar todos os usuários
 def listUsers(loggedUser, logMode):
   database = pd.ExcelFile('database.xlsx')
   usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
+  quantity = len(usersList)
   
   print('\n===========================================================================\n')
   print(usersList)
   print('\n===========================================================================\n')
   
+  print('Há {} usuários cadastrados'.format(quantity))
   row = loggedUser.index[0]
   if(logMode == True):
     log.log(loggedUser.loc[row].nome, 'listou todos os usuários')
@@ -220,3 +223,24 @@ def questionUntilReturnsInteger(string):
 def logout():
   print("Obrigado por escolher a Maravilha Musical! Até mais!")
   exit()
+
+def  listUsersByAgeRange(loggedUser):
+  database = pd.ExcelFile('database.xlsx')
+  usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
+  print("Você entrou na busca por faixa etária.")
+  minimum = questionUntilReturnsInteger('Qual a idade mínima a ser pesquisada?')
+  maximum = questionUntilReturnsInteger('Qual a idade máxima a ser pesquisada?')
+  
+
+  listPeopleInRange = usersList.loc [(usersList['idade'] > minimum) & (usersList['idade'] < maximum)]
+  quantity = len(listPeopleInRange)
+
+  if(quantity>0):
+    print('\n===========================================================================\n')
+    print(listPeopleInRange)
+    print('\n===========================================================================\n')
+    print('Há {} usuários cadastrados nesta faixa etária'.format(quantity))
+  else:
+    print('Não há usuários cadastrados nesta faixa etária'.format(quantity))
+  row = loggedUser.index[0]
+  log.log(loggedUser.loc[row].nome, 'listou todos os usuários pelo range de {} até {} anos e obteve {} resultados'.format(minimum, maximum, quantity))
