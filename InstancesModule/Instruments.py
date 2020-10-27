@@ -320,7 +320,7 @@ def listSalesInTimeAndAgeRange(loggedUser):
     try:
 
       dateInput = input("Qual o período de tempo inicial? Eu estou esperando um formato 31/12/2020\n")
-      initial = dt.datetime.strptime(dateInput, "%d/%m/%Y")
+      initial = dt.datetime.strptime(dateInput, "%d/%m/%Y").date()
       break
     except KeyboardInterrupt:
       exit()
@@ -330,7 +330,7 @@ def listSalesInTimeAndAgeRange(loggedUser):
   while True:
     try:
       dateInput = input("Qual o período de tempo final? Eu estou esperando um formato 31/12/2020\n")
-      final = dt.datetime.strptime(dateInput, "%d/%m/%Y")
+      final = dt.datetime.strptime(dateInput, "%d/%m/%Y").date()
       break
     except KeyboardInterrupt:
       exit()
@@ -349,7 +349,7 @@ def listSalesInTimeAndAgeRange(loggedUser):
   print('\n===========================================================================\n')
   print(filteredInstrumentlist)
   print('\n===========================================================================\n')
-  print('{} vendas ocorreram.'.format(quantity))
+  print('{} vendas ocorreram no período de {} a {}.'.format(quantity, initial, final))
 
   row = loggedUser.index[0]
-  log.log(loggedUser.loc[row].nome, 'listou todas as vendas no banco de dados de {} até {}'.format(initial, final))
+  log.log(loggedUser.loc[row].nome, 'listou todas as vendas no banco de dados de {} até {} com usuários de {} aos {} anos de idade'.format(initial, final, minimum, maximum))
