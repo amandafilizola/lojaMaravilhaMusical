@@ -5,6 +5,8 @@ import InstancesModule.People as people
 import InstancesModule.Profiles as profiles
 import os, sys
 
+DATABASE_PATH = 'database.xlsx';
+
 def DbInit():
   vendido_a = [x for x in range(20)]
   vendedor = [x for x in range(20)]
@@ -26,17 +28,17 @@ def DbInit():
     'preco':[800,800,800,800,400,400,400,400,1400,1400,1400,1400,1200,1200,1200,1200,550,550,550,550]
     }
   frame = pd.DataFrame(instrumentsDict)
-  with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
+  with pd.ExcelWriter(DATABASE_PATH, engine='openpyxl', mode='a') as writer:
     #OLHA AQUI UM LIST COMPREHENSION!!
     frame.to_excel(writer, sheet_name='instrumentos',header=True, index=False)
   writer.save()
-  log.log('Instrumentos', 'inicializou o banco de dados')
+  log.log('Admin', 'inicializou o banco de dados de instrumentos')
 
 def listInstruments(loggedUser, showMode, logMode):
   #se showMode for True, itens já vendidos devem aparecer
   #se showMode for False, apenas itens disponíveis devem aparecer
 
-  database = pd.ExcelFile('database.xlsx')
+  database = pd.ExcelFile(DATABASE_PATH)
   instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
 
   if(showMode == False):
@@ -54,7 +56,7 @@ def listInstruments(loggedUser, showMode, logMode):
 def buyInstrument(loggedUser, showMode, logMode):
   listInstruments(loggedUser, showMode, logMode)
   whichInstrument = people.questionUntilReturnsInteger('Qual o id do instrumento que deseja comprar?\n')
-  database = pd.ExcelFile('database.xlsx')
+  database = pd.ExcelFile(DATABASE_PATH)
   instrumentsList = database.parse('instrumentos')
   if(pd.isnull(instrumentsList.loc[instrumentsList['id'] == whichInstrument].vendedor.iloc[0])):
     usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
@@ -82,7 +84,7 @@ def buyInstrument(loggedUser, showMode, logMode):
       instrumentsList.loc[instrumentsList['id']==whichInstrument,'vendedor'] = sellerName
       instrumentsList.loc[instrumentsList['id']==whichInstrument,'data da venda'] = now
 
-      with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
+      with pd.ExcelWriter(DATABASE_PATH, engine='openpyxl', mode='a') as writer:
         workbook = writer.book
         try:
           workbook.remove(workbook['instrumentos'])
@@ -102,7 +104,7 @@ def buyInstrument(loggedUser, showMode, logMode):
     print('Ops, parece que já vendemos este item! Quer olhar algo mais?\n')
 
 def showStock(loggedUser):
-  database = pd.ExcelFile('database.xlsx')
+  database = pd.ExcelFile(DATABASE_PATH)
   instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
 
   instrumentTypes = set(instrumentsList.loc[:,'tipo'].values)
@@ -119,14 +121,14 @@ def createInstrument(loggedUser):
   price = people.questionUntilReturnsInteger("Qual o preço do instrumento?\n")
 
   #ler excel para pegar o ultimo id de instrumento gerado
-  if(not os.path.exists('database.xlsx')):
+  if(not os.path.exists(DATABASE_PATH)):
     id=1
     excelWriteMode = 'w'
     headerMode = True
   else:
     excelWriteMode = 'a'
     headerMode = False
-    database = pd.read_excel('database.xlsx', 'instrumentos')
+    database = pd.read_excel(DATABASE_PATH, 'instrumentos')
     max_value = database['id'].max()
     id = max_value+1
 
@@ -142,7 +144,7 @@ def createInstrument(loggedUser):
   frame = pd.DataFrame(instrumentsDict)
 
   #escrever no excel
-  with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode=excelWriteMode) as writer:
+  with pd.ExcelWriter(DATABASE_PATH, engine='openpyxl', mode=excelWriteMode) as writer:
     #OLHA AQUI UM LIST COMPREHENSION!!
     writer.sheets = {ws.title: ws for ws in writer.book.worksheets}
     frame.to_excel(writer, sheet_name='instrumentos',startrow=writer.sheets['instrumentos'].max_row, header=headerMode, index=False)
@@ -157,7 +159,7 @@ def createInstrument(loggedUser):
 
 def updateInstrument(loggedUser):
   print("Você entrou na atualização de instrumentos.")
-  database = pd.ExcelFile('database.xlsx')
+  database = pd.ExcelFile(DATABASE_PATH)
   instrumentsList = database.parse('instrumentos')
   listInstruments(loggedUser, False, False)
 
@@ -189,7 +191,7 @@ def updateInstrument(loggedUser):
     instrumentsList.loc[instrumentsList['id'] == whichInstrument].preco.iloc[0]
     ))
     if(updateApproved == 1):
-      with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
+      with pd.ExcelWriter(DATABASE_PATH, engine='openpyxl', mode='a') as writer:
         workbook = writer.book
         try:
           workbook.remove(workbook['instrumentos'])
@@ -213,7 +215,7 @@ def updateInstrument(loggedUser):
 
 def deleteInstrument(loggedUser):
   print("Você entrou na deleção de instrumentos.")
-  database = pd.ExcelFile('database.xlsx')
+  database = pd.ExcelFile(DATABASE_PATH)
   instrumentsList = database.parse('instrumentos')
   listInstruments(loggedUser, False, False)
 
@@ -225,7 +227,7 @@ def deleteInstrument(loggedUser):
     deleteApproved = people.questionUntilReturnsInteger('Você confirma esta deleção?\n1.Sim\n2.Não\n')
     if(deleteApproved == 1):
       filteredInstrumentlist = instrumentsList[instrumentsList['id'] != whichInstrument]
-      with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
+      with pd.ExcelWriter(DATABASE_PATH, engine='openpyxl', mode='a') as writer:
         workbook = writer.book
         try:
           workbook.remove(workbook['instrumentos'])
@@ -247,7 +249,7 @@ def deleteInstrument(loggedUser):
 
 def searchForInstrument(loggedUser):
   print("Você entrou na busca por instrumentos.")
-  database = pd.ExcelFile('database.xlsx')
+  database = pd.ExcelFile(DATABASE_PATH)
   instrumentsList = database.parse('instrumentos')
   searchTerm = input('Procuras por que tipo de instrumento?')
   searchResults = instrumentsList[instrumentsList['tipo'].str.contains(searchTerm)]
@@ -259,7 +261,7 @@ def searchForInstrument(loggedUser):
   ))
 
 def listSales(loggedUser):
-  database = pd.ExcelFile('database.xlsx')
+  database = pd.ExcelFile(DATABASE_PATH)
   instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
 
   filteredInstrumentlist = instrumentsList[instrumentsList['vendedor'].notnull()]
@@ -274,7 +276,7 @@ def listSales(loggedUser):
   log.log(loggedUser.loc[row].nome, 'listou todas as vendas no banco de dados')
 
 def listSalesInTimeRange(loggedUser):
-  database = pd.ExcelFile('database.xlsx')
+  database = pd.ExcelFile(DATABASE_PATH)
   instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
 
   print('você entrou na listagem de vendas por período de tempo')
@@ -311,7 +313,7 @@ def listSalesInTimeRange(loggedUser):
   log.log(loggedUser.loc[row].nome, 'listou todas as vendas no banco de dados de {} até {}'.format(initial, final))
 
 def listSalesInTimeAndAgeRange(loggedUser):
-  database = pd.ExcelFile('database.xlsx')
+  database = pd.ExcelFile(DATABASE_PATH)
   instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
   usersList = database.parse('pessoas')
 
@@ -355,7 +357,7 @@ def listSalesInTimeAndAgeRange(loggedUser):
   log.log(loggedUser.loc[row].nome, 'listou todas as vendas no banco de dados de {} até {} com usuários de {} aos {} anos de idade'.format(initial, final, minimum, maximum))
 
 def listSalesInTimePeriodByUser(loggedUser):
-  database = pd.ExcelFile('database.xlsx')
+  database = pd.ExcelFile(DATABASE_PATH)
   instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
   usersList = database.parse('pessoas')
 

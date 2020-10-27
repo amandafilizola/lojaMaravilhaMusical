@@ -4,6 +4,8 @@ import pandas as pd
 import LogModule.log as log
 import os, sys
 
+
+DATABASE_PATH = 'database.xlsx';
 #Cada pessoa terá um ID,Login, Senha, Nome, Idade, CPF, data de nascimento e por último, perfil.
 
 def createUser(profileAccess, loggedUser):
@@ -25,14 +27,14 @@ def createUser(profileAccess, loggedUser):
   password = input("Qual a senha a ser cadastrada?\n")
 
   #ler excel para pegar o ultimo id de pessoa gerado
-  if(not os.path.exists('database.xlsx')):
+  if(not os.path.exists(DATABASE_PATH)):
     id=1
     excelWriteMode = 'w'
     headerMode = True
   else:
     excelWriteMode = 'a'
     headerMode = False
-    database = pd.read_excel('database.xlsx', 'pessoas')
+    database = pd.read_excel(DATABASE_PATH, 'pessoas')
     max_value = database['id'].max()
     id = max_value+1
 
@@ -49,7 +51,7 @@ def createUser(profileAccess, loggedUser):
   frame = pd.DataFrame(personDict)
 
   #escrever no excel
-  with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode=excelWriteMode) as writer:
+  with pd.ExcelWriter(DATABASE_PATH, engine='openpyxl', mode=excelWriteMode) as writer:
     #OLHA AQUI UM LIST COMPREHENSION!!
     writer.sheets = {ws.title: ws for ws in writer.book.worksheets}
     frame.to_excel(writer, sheet_name='pessoas',startrow=writer.sheets['pessoas'].max_row, header=headerMode, index=False)
@@ -68,19 +70,19 @@ def DbInit():
   personDict = {'id':1, 'login':['admin'], 'senha':['admin'], 'nome':['admin'], 'idade': [0], 'cpf':0, 'data nascimento':[0], 'perfil':[profiles.Profiles.Manager]}
   frame = pd.DataFrame(personDict)
   #escrever no excel
-  with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='w') as writer:
+  with pd.ExcelWriter(DATABASE_PATH, engine='openpyxl', mode='w') as writer:
     #OLHA AQUI UM LIST COMPREHENSION!!
     frame.to_excel(writer, sheet_name='pessoas',header=True, index=False)
   writer.save()
-  log.log('Admin', 'inicializou o banco de dados')
+  log.log('Admin', 'inicializou o banco de dados de pessoas')
 
 #realizar login
 def login():
-  if(os.path.exists('database.xlsx')):
+  if(os.path.exists(DATABASE_PATH)):
     tryLogin = input("login?\n")
     tryPassword = input("senha?\n")
 
-    database = pd.ExcelFile('database.xlsx')
+    database = pd.ExcelFile(DATABASE_PATH)
     usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
     loggedUser = usersList.loc[(usersList['login'] == tryLogin) & (usersList['senha']== tryPassword)]
     if(len(loggedUser)==1):
@@ -94,14 +96,14 @@ def login():
 
 #listar e aprovar perfis pendentes
 def listPendingProfiles(loggedUser):
-  if(os.path.exists('database.xlsx')):
-    database = pd.ExcelFile('database.xlsx')
+  if(os.path.exists(DATABASE_PATH)):
+    database = pd.ExcelFile(DATABASE_PATH)
     usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
     listPendingUsers = usersList.loc[usersList['perfil'] == profiles.Profiles.Pending]
     if(len(listPendingUsers)>0):
       approve = True
       while approve:
-        database = pd.ExcelFile('database.xlsx')
+        database = pd.ExcelFile(DATABASE_PATH)
         usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
         listPendingUsers = usersList.loc[usersList['perfil'] == profiles.Profiles.Pending]
         if(len(listPendingUsers)>0):
@@ -121,7 +123,7 @@ def listPendingProfiles(loggedUser):
             elif(newProfile==3):
               usersList.loc[usersList['id']==approveUserId,'perfil'] = profiles.Profiles.Manager
 
-            with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
+            with pd.ExcelWriter(DATABASE_PATH, engine='openpyxl', mode='a') as writer:
               workbook = writer.book
               try:
                 workbook.remove(workbook['pessoas'])
@@ -143,7 +145,7 @@ def listPendingProfiles(loggedUser):
 #buscar usuários
 def searchForUsers(loggedUser):
   print("Você entrou na busca por usuários.")
-  database = pd.ExcelFile('database.xlsx')
+  database = pd.ExcelFile(DATABASE_PATH)
   usersList = database.parse('pessoas')
   searchTerm = input('Procuras por que usuário? podes procuras pelo login ou pelo nome.\n')
   searchResults = usersList[(usersList['login'].str.contains(searchTerm)) | (usersList['nome'].str.contains(searchTerm))]
@@ -158,7 +160,7 @@ def searchForUsers(loggedUser):
 def updateUser(loggedUser):
 
   print("Você entrou na atualização de usuários.")
-  database = pd.ExcelFile('database.xlsx')
+  database = pd.ExcelFile(DATABASE_PATH)
   usersList = database.parse('pessoas')
   listUsers(loggedUser, False)
 
@@ -188,7 +190,7 @@ def updateUser(loggedUser):
   print(usersList.loc[usersList['id'] == whichUser])
   approvedUserUpdate = questionUntilReturnsInteger('Você confirma a atualização acima?\n1.Sim\n2.Não\n')
   if(approvedUserUpdate == 1):
-    with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
+    with pd.ExcelWriter(DATABASE_PATH, engine='openpyxl', mode='a') as writer:
       workbook = writer.book
       try:
         workbook.remove(workbook['pessoas'])
@@ -202,7 +204,7 @@ def updateUser(loggedUser):
 
 #listar todos os usuários
 def listUsers(loggedUser, logMode):
-  database = pd.ExcelFile('database.xlsx')
+  database = pd.ExcelFile(DATABASE_PATH)
   usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
   quantity = len(usersList)
 
@@ -234,7 +236,7 @@ def logout():
 
 #função para listar usuários por faixa etária
 def listUsersByAgeRange(loggedUser):
-  database = pd.ExcelFile('database.xlsx')
+  database = pd.ExcelFile(DATABASE_PATH)
   usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
   print("Você entrou na busca por faixa etária.")
   minimum = questionUntilReturnsInteger('Qual a idade mínima a ser pesquisada?')

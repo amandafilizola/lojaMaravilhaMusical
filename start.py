@@ -5,8 +5,10 @@ import InstancesModule.Profiles as profiles
 from os import path
 import subprocess
 
+DATABASE_PATH = 'database.xlsx';
+
 #checar arquivos da base de dados, se não existir, rodar função de criação
-if(not path.exists('database.xlsx')):
+if(not path.exists(DATABASE_PATH)):
   print('DB init method...')
   people.DbInit()
   instruments.DbInit()
@@ -120,8 +122,6 @@ if(loginOption == 1):
       instruments.listSalesInTimeAndAgeRange(loggedUser)
     if(managerActionOption == 18):
       instruments.listSalesInTimePeriodByUser(loggedUser)
-
-
 
 elif(loginOption == 2): #para se cadastrar no sistema como cliente independente
   people.createUser(profiles.Profiles.Pending,loggedUser = None)
