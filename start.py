@@ -78,7 +78,8 @@ if(loginOption == 1):
     12.Aprovar o cadastro pendente\n
     13.Listou todas as vendas\n
     14.Listar todos os usuários\n
-    15.Listar usuários por faixa etária\n""")
+    15.Listar usuários por faixa etária\n
+    16.Listar vendas por período\n""")
 
     
     if(managerActionOption == 1):
@@ -111,6 +112,8 @@ if(loginOption == 1):
       people.listUsers(loggedUser, True)
     if(managerActionOption == 15):
       people.listUsersByAgeRange(loggedUser)
+    if(managerActionOption == 16):
+      instruments.listSalesInTimeRange(loggedUser)
 
 
 

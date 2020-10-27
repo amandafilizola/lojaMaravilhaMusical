@@ -17,6 +17,8 @@ def createUser(profileAccess, loggedUser):
       birthDate = input("Qual a data de nascimento do usuário?Eu estou esperando um formato 31/12/2020\n")
       bday = datetime.strptime(birthDate, "%d/%m/%Y")
       break
+    except KeyboardInterrupt:
+      exit()
     except:
       print("Não entendi isso. Me ajuda colocando no formato dd/mm/aaaa?\n")
   login = input("Qual o username a ser cadastrado?\n")
@@ -169,6 +171,8 @@ def updateUser(loggedUser):
       birthDate = input("Qual a data de nascimento do usuário?Eu estou esperando um formato 31/12/2020\n")
       bday = datetime.strptime(birthDate, "%d/%m/%Y")
       break
+    except KeyboardInterrupt:
+      exit()
     except:
       print("Não entendi isso. Me ajuda colocando no formato dd/mm/aaaa?\n")
   login = input("Qual o username a ser atualizado?\n")
@@ -215,6 +219,8 @@ def questionUntilReturnsInteger(string):
     try:
       result = int(input(string))
       break
+    except KeyboardInterrupt:
+      exit()
     except:
       print("Não entendi isso. Você digitou apenas o número?\n")
   return result
@@ -224,7 +230,8 @@ def logout():
   print("Obrigado por escolher a Maravilha Musical! Até mais!")
   exit()
 
-def  listUsersByAgeRange(loggedUser):
+#função para listar usuários por faixa etária
+def listUsersByAgeRange(loggedUser):
   database = pd.ExcelFile('database.xlsx')
   usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
   print("Você entrou na busca por faixa etária.")
@@ -241,6 +248,6 @@ def  listUsersByAgeRange(loggedUser):
     print('\n===========================================================================\n')
     print('Há {} usuários cadastrados nesta faixa etária'.format(quantity))
   else:
-    print('Não há usuários cadastrados nesta faixa etária'.format(quantity))
+    print('Não há usuários cadastrados nesta faixa etária')
   row = loggedUser.index[0]
   log.log(loggedUser.loc[row].nome, 'listou todos os usuários pelo range de {} até {} anos e obteve {} resultados'.format(minimum, maximum, quantity))

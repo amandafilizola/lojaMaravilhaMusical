@@ -272,3 +272,78 @@ def listSales(loggedUser):
 
   row = loggedUser.index[0]
   log.log(loggedUser.loc[row].nome, 'listou todas as vendas no banco de dados')
+
+def listSalesInTimeRange(loggedUser):
+  database = pd.ExcelFile('database.xlsx')
+  instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
+  
+  print('você entrou na listagem de vendas por período de tempo')
+  while True:
+    try:
+      
+      dateInput = input("Qual o período de tempo inicial? Eu estou esperando um formato 31/12/2020\n")
+      initial = dt.datetime.strptime(dateInput, "%d/%m/%Y")
+      break
+    except KeyboardInterrupt:
+      exit()
+    except:
+      print("Não entendi isso. Me ajuda colocando no formato dd/mm/aaaa?\n")
+
+  while True:
+    try:
+      dateInput = input("Qual o período de tempo final? Eu estou esperando um formato 31/12/2020\n")
+      final = dt.datetime.strptime(dateInput, "%d/%m/%Y")
+      break
+    except KeyboardInterrupt:
+      exit()
+    except:
+      print("Não entendi isso. Me ajuda colocando no formato dd/mm/aaaa?\n")
+
+  filteredInstrumentlist = instrumentsList[(instrumentsList['vendedor'].notnull()) & (pd.to_datetime(instrumentsList['data da venda']) > initial) & (pd.to_datetime(instrumentsList['data da venda']) < final) ]
+  quantity = len(filteredInstrumentlist)
+  
+  print('\n===========================================================================\n')
+  print(filteredInstrumentlist)
+  print('\n===========================================================================\n')
+  print('{} vendas ocorreram.'.format(quantity))
+
+  row = loggedUser.index[0]
+  log.log(loggedUser.loc[row].nome, 'listou todas as vendas no banco de dados de {} até {}'.format(initial, final))
+
+def listSalesInTimeAndAgeRange(loggedUser):
+  database = pd.ExcelFile('database.xlsx')
+  instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
+  usersList = database.parse('pessoas')
+  
+  print('você entrou na listagem de vendas por período de tempo')
+  while True:
+    try:
+      
+      dateInput = input("Qual o período de tempo inicial? Eu estou esperando um formato 31/12/2020\n")
+      initial = dt.datetime.strptime(dateInput, "%d/%m/%Y")
+      break
+    except KeyboardInterrupt:
+      exit()
+    except:
+      print("Não entendi isso. Me ajuda colocando no formato dd/mm/aaaa?\n")
+
+  while True:
+    try:
+      dateInput = input("Qual o período de tempo final? Eu estou esperando um formato 31/12/2020\n")
+      final = dt.datetime.strptime(dateInput, "%d/%m/%Y")
+      break
+    except KeyboardInterrupt:
+      exit()
+    except:
+      print("Não entendi isso. Me ajuda colocando no formato dd/mm/aaaa?\n")
+
+  filteredInstrumentlist = instrumentsList[(instrumentsList['vendedor'].notnull()) & (pd.to_datetime(instrumentsList['data da venda']) > initial) & (pd.to_datetime(instrumentsList['data da venda']) < final) ]
+  quantity = len(filteredInstrumentlist)
+  
+  print('\n===========================================================================\n')
+  print(filteredInstrumentlist)
+  print('\n===========================================================================\n')
+  print('{} vendas ocorreram.'.format(quantity))
+
+  row = loggedUser.index[0]
+  log.log(loggedUser.loc[row].nome, 'listou todas as vendas no banco de dados de {} até {}'.format(initial, final))
