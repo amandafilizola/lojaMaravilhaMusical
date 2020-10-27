@@ -353,3 +353,45 @@ def listSalesInTimeAndAgeRange(loggedUser):
 
   row = loggedUser.index[0]
   log.log(loggedUser.loc[row].nome, 'listou todas as vendas no banco de dados de {} até {} com usuários de {} aos {} anos de idade'.format(initial, final, minimum, maximum))
+
+def listSalesInTimePeriodByUser(loggedUser):
+  database = pd.ExcelFile('database.xlsx')
+  instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
+  usersList = database.parse('pessoas')
+
+  print('você entrou na listagem de vendas por período de tempo e por usuário')
+  while True:
+    try:
+
+      dateInput = input("Qual o período de tempo inicial? Eu estou esperando um formato 31/12/2020\n")
+      initial = dt.datetime.strptime(dateInput, "%d/%m/%Y")
+      break
+    except KeyboardInterrupt:
+      exit()
+    except:
+      print("Não entendi isso. Me ajuda colocando no formato dd/mm/aaaa?\n")
+
+  while True:
+    try:
+      dateInput = input("Qual o período de tempo final? Eu estou esperando um formato 31/12/2020\n")
+      final = dt.datetime.strptime(dateInput, "%d/%m/%Y")
+      break
+    except KeyboardInterrupt:
+      exit()
+    except:
+      print("Não entendi isso. Me ajuda colocando no formato dd/mm/aaaa?\n")
+
+  searchTerm = input('Procuras por que usuário? podes procuras pelo login ou pelo nome.\n')
+  searchResults = usersList[(usersList['login'] == searchTerm) | (usersList['nome'] == searchTerm)]
+
+  filteredInstrumentlist = instrumentsList[(instrumentsList['vendedor'].notnull()) & (pd.to_datetime(instrumentsList['data da venda']) > initial) & (pd.to_datetime(instrumentsList['data da venda']) < final) & (instrumentsList['vendido a'].isin(searchResults['nome']))]
+  quantity = len(filteredInstrumentlist)
+  if(quantity > 0):
+    print('\n===========================================================================\n')
+    print(filteredInstrumentlist)
+    print('\n===========================================================================\n')
+    print('{} compras ocorreram no período de {} a {} pelo comprador {}'.format(quantity, initial, final, searchTerm))
+  else:
+    print('não temos vendas cadastradas para este usuário no período de tempo escolhido.\n')
+  row = loggedUser.index[0]
+  log.log(loggedUser.loc[row].nome, 'listou todas as vendas no banco de dados de {} até {} do usuário {} e teve {} resultados'.format(initial, final,searchTerm, quantity))

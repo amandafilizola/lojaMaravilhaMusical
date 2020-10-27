@@ -80,7 +80,8 @@ if(loginOption == 1):
     14.Listar todos os usuários\n
     15.Listar usuários por faixa etária\n
     16.Listar vendas por período\n
-    17.Listar vendas por período e por faixa etária\n""")
+    17.Listar vendas por período e por faixa etária\n
+    18.Listar vendas por período e por usuário\n""")
 
 
     if(managerActionOption == 1):
@@ -117,9 +118,8 @@ if(loginOption == 1):
       instruments.listSalesInTimeRange(loggedUser)
     if(managerActionOption == 17):
       instruments.listSalesInTimeAndAgeRange(loggedUser)
-
-
-
+    if(managerActionOption == 18):
+      instruments.listSalesInTimePeriodByUser(loggedUser)
 
 
 
