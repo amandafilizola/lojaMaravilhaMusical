@@ -13,7 +13,7 @@ if(not path.exists('database.xlsx')):
 
 loginOption = people.questionUntilReturnsInteger('Olá, bem-vindo a Loja Maravilha Musical! Você pode:\n1.Realizar login.\n2.Se cadastrar no sistema\n3.Sair do sistema\n')
 
-if(loginOption == 1): 
+if(loginOption == 1):
   loggedUser = people.login()
   print('Basta digitar a opção desejada!')
   row = loggedUser.index[0]
@@ -79,9 +79,10 @@ if(loginOption == 1):
     13.Listou todas as vendas\n
     14.Listar todos os usuários\n
     15.Listar usuários por faixa etária\n
-    16.Listar vendas por período\n""")
+    16.Listar vendas por período\n
+    17.Listar vendas por período e por faixa etária\n""")
 
-    
+
     if(managerActionOption == 1):
       instruments.listInstruments(loggedUser, True, True)
     if(managerActionOption == 2):
@@ -114,6 +115,8 @@ if(loginOption == 1):
       people.listUsersByAgeRange(loggedUser)
     if(managerActionOption == 16):
       instruments.listSalesInTimeRange(loggedUser)
+    if(managerActionOption == 17):
+      instruments.listSalesInTimeAndAgeRange(loggedUser)
 
 
 

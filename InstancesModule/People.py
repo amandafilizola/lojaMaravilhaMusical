@@ -41,6 +41,8 @@ def createUser(profileAccess, loggedUser):
     types = [profiles.Profiles.Client, profiles.Profiles.Employee, profiles.Profiles.Manager]
     profileType = questionUntilReturnsInteger('Qual o perfil que você deseja definir para este usuário?\n1.Cliente\n2.Funcionário\n3.Gerente\n')
     profileAccess = types[profileType-1]
+  else:
+    isManager = profiles.Profiles.Pending
 
   #UM LINDO DICIONÁRIO QUE SERIA O OBJETO PESSOA!
   personDict = {'id':id, 'login':[login], 'senha':[password], 'nome':[name], 'idade':[age],'cpf':[cpf], 'data nascimento':[bday], 'perfil':[profileAccess]}
@@ -203,11 +205,11 @@ def listUsers(loggedUser, logMode):
   database = pd.ExcelFile('database.xlsx')
   usersList = database.parse('pessoas')  # read a specific sheet to DataFrame
   quantity = len(usersList)
-  
+
   print('\n===========================================================================\n')
   print(usersList)
   print('\n===========================================================================\n')
-  
+
   print('Há {} usuários cadastrados'.format(quantity))
   row = loggedUser.index[0]
   if(logMode == True):
@@ -237,7 +239,7 @@ def listUsersByAgeRange(loggedUser):
   print("Você entrou na busca por faixa etária.")
   minimum = questionUntilReturnsInteger('Qual a idade mínima a ser pesquisada?')
   maximum = questionUntilReturnsInteger('Qual a idade máxima a ser pesquisada?')
-  
+
 
   listPeopleInRange = usersList.loc [(usersList['idade'] > minimum) & (usersList['idade'] < maximum)]
   quantity = len(listPeopleInRange)

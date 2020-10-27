@@ -38,7 +38,7 @@ def listInstruments(loggedUser, showMode, logMode):
 
   database = pd.ExcelFile('database.xlsx')
   instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
-  
+
   if(showMode == False):
     filteredInstrumentlist = instrumentsList[instrumentsList['vendedor'].isnull()]
   else:
@@ -46,7 +46,7 @@ def listInstruments(loggedUser, showMode, logMode):
   print('\n===========================================================================\n')
   print(filteredInstrumentlist)
   print('\n===========================================================================\n')
-  
+
   row = loggedUser.index[0]
   if(logMode == True):
     log.log(loggedUser.loc[row].nome, 'listou todos os instrumentos')
@@ -70,7 +70,7 @@ def buyInstrument(loggedUser, showMode, logMode):
     instrumentsList.loc[instrumentsList['id'] == whichInstrument].preco.iloc[0],
     usersList.loc[usersList['id'] == whichSeller].nome.iloc[0]
     ))
-    
+
     if(buyApproved == 1):
       sellerName = usersList.loc[usersList['id'] == whichSeller].nome.iloc[0]
       row = loggedUser.index[0]
@@ -81,7 +81,7 @@ def buyInstrument(loggedUser, showMode, logMode):
       instrumentsList.loc[instrumentsList['id']==whichInstrument,'vendido a'] = clientName
       instrumentsList.loc[instrumentsList['id']==whichInstrument,'vendedor'] = sellerName
       instrumentsList.loc[instrumentsList['id']==whichInstrument,'data da venda'] = now
-        
+
       with pd.ExcelWriter('database.xlsx', engine='openpyxl', mode='a') as writer:
         workbook = writer.book
         try:
@@ -112,7 +112,7 @@ def showStock(loggedUser):
     print('| {} -->  {}    '.format(instrumentType,len(filteredArray[filteredArray.loc[:,'tipo']==instrumentType])))
   row = loggedUser.index[0]
   log.log(loggedUser.loc[row].nome, 'consultou o estoque de instrumentos')
-  
+
 def createInstrument(loggedUser):
   print("Você entrou no cadastro de novos instrumentos.")
   typeOfInstrument = input("Qual o tipo do instrumento a ser cadastrado?\n")
@@ -154,7 +154,7 @@ def createInstrument(loggedUser):
     typeOfInstrument,
     price,
   ))
-    
+
 def updateInstrument(loggedUser):
   print("Você entrou na atualização de instrumentos.")
   database = pd.ExcelFile('database.xlsx')
@@ -183,7 +183,7 @@ def updateInstrument(loggedUser):
       newPrice = people.questionUntilReturnsInteger('Qual o novo preço do instrumento?\n')
       instrumentsList.loc[instrumentsList['id'] == whichInstrument,'tipo'] = newType
       instrumentsList.loc[instrumentsList['id'] == whichInstrument,'preco'] = newPrice
-    
+
     updateApproved = people.questionUntilReturnsInteger('O instrumento é um(a) {} e custa {}. Você confirma esta modificação?\n1.Sim\n2.Não\n'.format(
     instrumentsList.loc[instrumentsList['id'] == whichInstrument].tipo.iloc[0],
     instrumentsList.loc[instrumentsList['id'] == whichInstrument].preco.iloc[0]
@@ -198,7 +198,7 @@ def updateInstrument(loggedUser):
         finally:
           instrumentsList.to_excel(writer, sheet_name='instrumentos',header=True, index=False)
         writer.save()
-      
+
       row = loggedUser.index[0]
       if(updateType == 1):
         log.log(loggedUser.loc[row].nome, 'atualizou o tipo do instrumento {} de "{}" para "{}"'.format(whichInstrument,oldType,newType))
@@ -217,7 +217,7 @@ def deleteInstrument(loggedUser):
   instrumentsList = database.parse('instrumentos')
   listInstruments(loggedUser, False, False)
 
-  
+
   whichInstrument = people.questionUntilReturnsInteger('Qual id do instrumento que você deseja deletar?\n')
   #checar se o id está na lista
   if(len(instrumentsList[instrumentsList['id'] == whichInstrument])>0):
@@ -261,10 +261,10 @@ def searchForInstrument(loggedUser):
 def listSales(loggedUser):
   database = pd.ExcelFile('database.xlsx')
   instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
-  
+
   filteredInstrumentlist = instrumentsList[instrumentsList['vendedor'].notnull()]
   quantity = len(filteredInstrumentlist)
-  
+
   print('\n===========================================================================\n')
   print(filteredInstrumentlist)
   print('\n===========================================================================\n')
@@ -276,11 +276,11 @@ def listSales(loggedUser):
 def listSalesInTimeRange(loggedUser):
   database = pd.ExcelFile('database.xlsx')
   instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
-  
+
   print('você entrou na listagem de vendas por período de tempo')
   while True:
     try:
-      
+
       dateInput = input("Qual o período de tempo inicial? Eu estou esperando um formato 31/12/2020\n")
       initial = dt.datetime.strptime(dateInput, "%d/%m/%Y")
       break
@@ -301,7 +301,7 @@ def listSalesInTimeRange(loggedUser):
 
   filteredInstrumentlist = instrumentsList[(instrumentsList['vendedor'].notnull()) & (pd.to_datetime(instrumentsList['data da venda']) > initial) & (pd.to_datetime(instrumentsList['data da venda']) < final) ]
   quantity = len(filteredInstrumentlist)
-  
+
   print('\n===========================================================================\n')
   print(filteredInstrumentlist)
   print('\n===========================================================================\n')
@@ -314,11 +314,11 @@ def listSalesInTimeAndAgeRange(loggedUser):
   database = pd.ExcelFile('database.xlsx')
   instrumentsList = database.parse('instrumentos')  # read a specific sheet to DataFrame
   usersList = database.parse('pessoas')
-  
-  print('você entrou na listagem de vendas por período de tempo')
+
+  print('você entrou na listagem de vendas por período de tempo e por idade')
   while True:
     try:
-      
+
       dateInput = input("Qual o período de tempo inicial? Eu estou esperando um formato 31/12/2020\n")
       initial = dt.datetime.strptime(dateInput, "%d/%m/%Y")
       break
@@ -337,9 +337,15 @@ def listSalesInTimeAndAgeRange(loggedUser):
     except:
       print("Não entendi isso. Me ajuda colocando no formato dd/mm/aaaa?\n")
 
-  filteredInstrumentlist = instrumentsList[(instrumentsList['vendedor'].notnull()) & (pd.to_datetime(instrumentsList['data da venda']) > initial) & (pd.to_datetime(instrumentsList['data da venda']) < final) ]
+
+  minimum = people.questionUntilReturnsInteger('Qual a idade mínima a ser pesquisada?')
+  maximum = people.questionUntilReturnsInteger('Qual a idade máxima a ser pesquisada?')
+
+  listPeopleInRange = usersList.loc[(usersList['idade'] >= minimum) & (usersList['idade'] <= maximum)]
+  quantity = len(listPeopleInRange)
+  filteredInstrumentlist = instrumentsList[(instrumentsList['vendedor'].notnull()) & (pd.to_datetime(instrumentsList['data da venda']) > initial) & (pd.to_datetime(instrumentsList['data da venda']) < final) & (instrumentsList['vendido a'].isin(listPeopleInRange['nome']))]
   quantity = len(filteredInstrumentlist)
-  
+
   print('\n===========================================================================\n')
   print(filteredInstrumentlist)
   print('\n===========================================================================\n')
